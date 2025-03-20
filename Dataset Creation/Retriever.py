@@ -44,12 +44,12 @@ class Retriever:
                 return None
 
         # Aspetta che il caricamento delle recensioni sia completato
-        WebDriverWait(driver, 30).until(
+        WebDriverWait(driver, 3600).until(
             EC.invisibility_of_element_located((By.CLASS_NAME, "ipc-see-more"))
         )
 
     except Exception as e:
-        print('esecuzione interrotta tempo finito')
+        print('execution interrupted - was taking too long')
         
 
     # Estrai i numeri dalle recensioni
@@ -75,6 +75,12 @@ class Retriever:
     # Base URL for the reviews
     base_url = "https://www.imdb.com/review/"
 
+    # Make sure the browser language is set in EN
+    headers = {
+    "Accept-Language": "en-US,en;q=0.5",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
+    }
+
 
     # Loop through the review IDs with tqdm for the progress bar
     for review_id in tqdm.tqdm(review_ids, desc='retrieving reviews', unit='review'):
@@ -83,7 +89,7 @@ class Retriever:
     
         try:
             # Send a GET request to the URL
-            response = requests.get(url)
+            response = requests.get(url, headers=headers)
             if response.status_code != 200:
                 continue  # Skip if the page does not exist
 
@@ -93,7 +99,7 @@ class Retriever:
             # Extract movie data (title and ID)
             movie_tag = soup.find('a', href=lambda x: x and x.startswith('/title/tt'))
             movie_title = movie_tag.text.strip() if movie_tag else None  # Extract movie name
-            movie_id = movie_tag['href'].split('/')[2] if movie_tag else None  # Extract movie ID
+            movie_id = movie_tag['href'].split('/')[2].split('?')[0] if movie_tag else None  # Extract movie ID
 
             # Validate that the title is a movie
             if movie_id:
