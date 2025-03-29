@@ -4,6 +4,7 @@ class Retriever:
 
 
   def get_reviews_ids_from_movie_id(self, movie_id):
+
     from selenium import webdriver
     from selenium.webdriver.chrome.service import Service
     from selenium.webdriver.common.by import By
@@ -12,7 +13,6 @@ class Retriever:
     from selenium.common.exceptions import TimeoutException, NoSuchElementException
     from webdriver_manager.chrome import ChromeDriverManager
     import re
-    
 
     options = webdriver.ChromeOptions()
     options.headless = True
