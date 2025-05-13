@@ -156,5 +156,84 @@ class Retriever:
     #print("Finished scraping. The data is saved to 'imdb_reviews_movies_only.csv'.")
 
     return reviews_df
+  
+
+
+
+  def get_movie_keywords_from_movie_id(self, movie_id):
+    from selenium import webdriver
+    from selenium.webdriver.chrome.service import Service
+    from selenium.webdriver.chrome.options import Options
+    from selenium.webdriver.common.by import By
+    from selenium.webdriver.support.ui import WebDriverWait
+    from selenium.webdriver.support import expected_conditions as EC
+    from webdriver_manager.chrome import ChromeDriverManager
+    from bs4 import BeautifulSoup
+    import pandas as pd
+    import time
+
+    url = f"https://www.imdb.com/title/tt{movie_id}/keywords/"
+
+    options = webdriver.ChromeOptions()
+    options.headless = True
+    options.add_argument("--lang=en-US")
+
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+    driver.get(url)
+
+    try:
+        # Wait for the first keyword item to appear
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, 'li.ipc-metadata-list-summary-item'))
+        )
+
+        # Keep clicking the "More" button as long as it's available
+        while True:
+            try:
+                more_button = WebDriverWait(driver, 5).until(
+                    EC.presence_of_element_located((By.CSS_SELECTOR, 'button.ipc-see-more__button'))
+                )
+                driver.execute_script("arguments[0].click();", more_button)
+                time.sleep(1.5)  # Allow content to load
+            except:
+                break
+
+    except Exception as e:
+        print(f"Error: Keywords did not load for movie ID {movie_id}: {e}")
+        driver.quit()
+        return pd.DataFrame()
+
+    soup = BeautifulSoup(driver.page_source, 'html.parser')
+    driver.quit()
+
+    list_items = soup.select('li.ipc-metadata-list-summary-item')
+    if not list_items:
+        print("Warning: No keyword items found.")
+        return pd.DataFrame()
+
+    keywords_data = []
+
+    for item in list_items:
+        keyword_tag = item.select_one('a.ipc-metadata-list-summary-item__t')
+        if not keyword_tag:
+            continue
+        keyword = keyword_tag.text.strip()
+
+        up_tag = item.select_one('span.ipc-voting__label__count--up')
+        down_tag = item.select_one('span.ipc-voting__label__count--down')
+
+        helpful = int(up_tag.text.strip()) if up_tag and up_tag.text.strip().isdigit() else 0
+        not_helpful = int(down_tag.text.strip()) if down_tag and down_tag.text.strip().isdigit() else 0
+
+        keywords_data.append({
+            "Movie_ID": movie_id,
+            "Keyword": keyword,
+            "Helpful": helpful,
+            "Not_Helpful": not_helpful
+        })
+
+    return pd.DataFrame(keywords_data)
+
+
 
 
