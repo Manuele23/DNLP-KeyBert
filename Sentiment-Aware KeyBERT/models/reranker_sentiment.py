@@ -1,7 +1,6 @@
 # You need to install the following packages:
 # pip install keybert
 # pip install sentence-transformers
-# pip install transformers
 
 from typing import List, Sequence, Tuple, Union
 from keybert import KeyBERT  # type: ignore
@@ -45,7 +44,7 @@ class KeyBERTSentimentReranker(KeyBERT):
         model: Union[str, "SentenceTransformer"] = "sentence-transformers/all-MiniLM-L6-v2",  # type: ignore
         *,
         alpha: float = 0.5,
-        sentiment_model_name: str = "nlptown/bert-base-multilingual-uncased-sentiment",
+        sentiment_model_name: str = "cardiffnlp/twitter-roberta-base-sentiment", # or "nlptown/bert-base-multilingual-uncased-sentiment"
         device: str = "cpu",
         **kwargs,
     ) -> None:

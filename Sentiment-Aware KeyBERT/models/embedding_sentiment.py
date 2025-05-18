@@ -1,5 +1,8 @@
 # You need to install the following packages:
 # pip install keybert
+# pip install scikit-learn
+# pip install numpy
+# pip install torch
 # pip install sentence-transformers
 
 import numpy as np  # Fundamental package for numerical computing in Python
@@ -10,7 +13,6 @@ import torch.nn.functional as F  # Functional interface for activation functions
 
 from sklearn.feature_extraction.text import CountVectorizer  # Extract text n-gram candidates
 from sklearn.metrics.pairwise import cosine_similarity  # Compute cosine similarity between embeddings
-from sklearn.preprocessing import normalize  # Normalize data along specified axis
 
 # KeyBERT keyword extraction base class
 from keybert import KeyBERT as KB  # type: ignore 
@@ -61,7 +63,7 @@ class KeyBERTSentimentAware(KB):
     def __init__(
         self,
         model,
-        sentiment_model_name: str = "nlptown/bert-base-multilingual-uncased-sentiment",
+        sentiment_model_name: str ="cardiffnlp/twitter-roberta-base-sentiment", # or "nlptown/bert-base-multilingual-uncased-sentiment"
         alpha: float = 0.7,
         candidate_pool_size: int = 100,
         device: str = "cpu",
