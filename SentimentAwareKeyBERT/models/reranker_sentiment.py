@@ -2,11 +2,13 @@
 # pip install keybert
 # pip install sentence-transformers
 
+import sys
+sys.path.append("../../SentimentAwareKeyBERT/models")
+
 from typing import List, Sequence, Tuple, Union
 from keybert import KeyBERT  # type: ignore
 from sentence_transformers import SentenceTransformer  # type: ignore
 from sentiment_model import SentimentModel  
-
 # KeyBERT Post-hoc Sentiment-Aware Re-ranking
 
 # This module extends KeyBERT to include sentiment-aware keyword extraction by defining 
@@ -84,12 +86,13 @@ class KeyBERTSentimentReranker(KeyBERT):
     # underlying behavior of KeyBERT without redefining all parameters here.
     # This is possible because KeyBERT uses **kwargs to accept a wide range of parameters.
     def extract_keywords(
-        self,
-        docs: Union[str, Sequence[str]],
-        *,
-        top_n: int = 10,
-        **kwargs,
-    ) -> List[List[Tuple[str, float]]]:
+    self,
+    doc: str,
+    *,
+    top_n: int = 5,
+    print_doc_polarity: bool = False,
+    **kwargs,
+) -> List[Tuple[str, float, float]]:
         """
         Returns top-n keywords using sentiment-aware re-ranking.
 
@@ -98,66 +101,57 @@ class KeyBERTSentimentReranker(KeyBERT):
         2. Compute sentiment polarity scores for the full review and each keyword.
         3. For each keyword, calculate an alignment score with the review's sentiment.
         4. Fuse cosine similarity and alignment using the alpha parameter.
-        5. Return the top-n keywords sorted by the new combined score.
+        5. Returns list of (keyword, adjusted_score, keyword_sentiment) tuples.
         """
 
-        # Normalize input to a list of reviews
-        if isinstance(docs, str):
-            docs = [docs]
-            single_doc = True
-        else:
-            single_doc = False
-
         # Step 1: extract keywords from KeyBERT
-        # Output: base_keywords[review_index] = List[Tuple[keyword, cosine_sim]]
-        base_keywords = super().extract_keywords(docs, top_n=top_n, **kwargs)
+        base_keywords = super().extract_keywords(doc, top_n=top_n, **kwargs)
 
-        # Ensure base_keywords is always List[List[Tuple[str, float]]] even if there is only 1 review
-        if isinstance(base_keywords, list) and all(isinstance(k, tuple) for k in base_keywords):
-            base_keywords = [base_keywords]
+        # Step 2: compute sentiment for the full review
+        s_doc = self.get_sentiment_score(doc)
 
-        # Step 2: compute sentiment for each review
-        # Output: doc_sentiments[review_index] = float in [0, +1]
-        doc_sentiments = [self.get_sentiment_score(doc) for doc in docs]
+        # Print document polarity if requested
+        if print_doc_polarity:
+            # Scale polarity from [0,1] to [0,10]
+            scaled_pol = s_doc * 10
+
+            # Determine polarity label with neutral zone between 4 and 6 on 0-10 scale
+            if scaled_pol < 4:
+                polarity_label = "Negative"
+            elif scaled_pol > 6:
+                polarity_label = "Positive"
+            else:
+                polarity_label = "Neutral"
+
+            print(f"\n=== Document Polarity Score: {scaled_pol:.2f} ({polarity_label}) ===\n")
 
         # Step 3–4: re-rank using sentiment alignment
-        # Output: reranked_all[review_index] = List[Tuple[keyword, fused_score]]
-        reranked_all: List[List[Tuple[str, float]]] = []
+        reranked_doc: List[Tuple[str, float, float]] = []
 
-        for kws, s_doc in zip(base_keywords, doc_sentiments):
-            # One list of re-ranked keywords for this review
-            reranked_doc: List[Tuple[str, float]] = []
+        for kw_data in base_keywords:
+            try:
+                if isinstance(kw_data, tuple) and len(kw_data) == 2:
+                    kw, cos_sim = kw_data
+                else:
+                    raise ValueError("Expected a (keyword, score) tuple")
 
-            # Normalize single-tuple edge case into list
-            if isinstance(kws, tuple) and len(kws) == 2 and isinstance(kws[0], str):
-                kws = [kws]
+                if not isinstance(kw, str) or not isinstance(cos_sim, (float, int)):
+                    raise ValueError("Malformed keyword-score pair")
 
-            for kw_data in kws:
-                try:
-                    if isinstance(kw_data, tuple) and len(kw_data) == 2:
-                        kw, cos_sim = kw_data
-                    else:
-                        raise ValueError("Expected a (keyword, score) tuple")
+                # Step 3: Compute sentiment for keyword and alignment score
+                s_kw = self.get_sentiment_score(kw)
+                align = 1.0 - abs(s_doc - s_kw)      # alignment ∈ [0, 1]
+                align_mapped = 2 * align - 1         # mapped to [-1, 1]
 
-                    if not isinstance(kw, str) or not isinstance(cos_sim, (float, int)):
-                        raise ValueError("Malformed keyword-score pair")
+                # Step 4: Combine cosine and alignment via convex combination
+                final_score = round((1.0 - self.alpha) * cos_sim + self.alpha * align_mapped, 4)
 
-                    # Step 3: Compute sentiment for keyword and alignment score
-                    s_kw = self.get_sentiment_score(kw)
-                    align = 1.0 - abs(s_doc - s_kw)      # alignment ∈ [0, 1]
-                    align_mapped = 2 * align - 1         # mapped to [-1, 1]
+                # Store keyword with new adjusted score and sentiment
+                reranked_doc.append((kw, final_score, s_kw))
 
-                    # Step 4: Combine cosine and alignment via convex combination
-                    final_score = round((1.0 - self.alpha) * cos_sim + self.alpha * align_mapped, 4)
+            except Exception as e:
+                print(f"Skipping invalid keyword data {kw_data}: {e}")
 
-                    # Store keyword with new adjusted score
-                    reranked_doc.append((kw, final_score))
-
-                except Exception as e:
-                    print(f"Skipping invalid keyword data {kw_data}: {e}")
-
-            # Sort keywords for this review by adjusted score
-            reranked_doc.sort(key=lambda x: x[1], reverse=True)
-            reranked_all.append(reranked_doc[:top_n])
-
-        return [reranked_all[0]] if single_doc else reranked_all
+        # Sort keywords for this review by adjusted score
+        reranked_doc.sort(key=lambda x: x[1], reverse=True)
+        return reranked_doc[:top_n]

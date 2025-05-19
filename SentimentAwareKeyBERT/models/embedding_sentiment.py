@@ -5,6 +5,9 @@
 # pip install torch
 # pip install sentence-transformers
 
+import sys
+sys.path.append("../../SentimentAwareKeyBERT/models")
+
 import numpy as np  # Fundamental package for numerical computing in Python
 from typing import Tuple  # Used for type hinting tuples in function signatures
 
@@ -64,7 +67,7 @@ class KeyBERTSentimentAware(KB):
         self,
         model,
         sentiment_model_name: str ="cardiffnlp/twitter-roberta-base-sentiment", # or "nlptown/bert-base-multilingual-uncased-sentiment"
-        alpha: float = 0.7,
+        alpha: float = 0.5,
         candidate_pool_size: int = 100,
         device: str = "cpu",
     ):
@@ -267,10 +270,11 @@ class KeyBERTSentimentAware(KB):
         print_doc_polarity : bool
             Whether to print the document's sentiment polarity score.
 
-        Returns:
-        --------
+        Returns
+        -------
         list of tuples
-            List of (keyword, score) tuples sorted by descending combined score.
+            List of (keyword, score, keyword_sentiment) tuples sorted by descending combined score.
+
         """
 
         # Select candidates filtered by combined semantic+sentiment scoring
@@ -321,4 +325,4 @@ class KeyBERTSentimentAware(KB):
         # Select top_n keywords sorted by combined score descending
         top_indices = np.argsort(final_scores)[-top_n:][::-1]
 
-        return [(candidates[i], final_scores[i]) for i in top_indices]
+        return [(candidates[i], final_scores[i], cand_pols[i]) for i in top_indices]
