@@ -51,7 +51,7 @@ class KeyBERTSentimentAware(KB):
     sentiment_model_name : str, optional (default: "nlptown/bert-base-multilingual-uncased-sentiment")
         Identifier of pretrained sentiment model on HuggingFace Hub.
 
-    alpha : float, optional (default: 0.7)
+    alpha : float, optional (default: 0.5)
         Weight to balance sentiment alignment vs semantic similarity.
         alpha=1.0 means only sentiment alignment is considered.
         alpha=0.0 means only semantic similarity is considered.
@@ -300,9 +300,9 @@ class KeyBERTSentimentAware(KB):
             scaled_pol = doc_pol * 10
 
             # Determine polarity label with neutral zone between 4 and 6 on 0-10 scale
-            if scaled_pol < 4:
+            if scaled_pol < 5.5:
                 polarity_label = "Negative"
-            elif scaled_pol > 6:
+            elif scaled_pol > 6.5:
                 polarity_label = "Positive"
             else:
                 polarity_label = "Neutral"

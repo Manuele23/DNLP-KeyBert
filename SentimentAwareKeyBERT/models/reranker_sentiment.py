@@ -9,6 +9,7 @@ from typing import List, Sequence, Tuple, Union
 from keybert import KeyBERT  # type: ignore
 from sentence_transformers import SentenceTransformer  # type: ignore
 from sentiment_model import SentimentModel  
+
 # KeyBERT Post-hoc Sentiment-Aware Re-ranking
 
 # This module extends KeyBERT to include sentiment-aware keyword extraction by defining 
@@ -116,9 +117,9 @@ class KeyBERTSentimentReranker(KeyBERT):
             scaled_pol = s_doc * 10
 
             # Determine polarity label with neutral zone between 4 and 6 on 0-10 scale
-            if scaled_pol < 4:
+            if scaled_pol < 5.5:
                 polarity_label = "Negative"
-            elif scaled_pol > 6:
+            elif scaled_pol > 6.5:
                 polarity_label = "Positive"
             else:
                 polarity_label = "Neutral"
