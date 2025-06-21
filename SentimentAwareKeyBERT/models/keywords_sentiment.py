@@ -183,7 +183,8 @@ class KeyBERTSentimentAware(KB):
         self, 
         doc: str, 
         ngram_range: Tuple[int, int] = (1, 3), 
-        threshold: float = 0.4
+        threshold: float = 0.4,
+        stop_words: str = 'english'
     ):
         """
         Extract initial candidates with CountVectorizer and filter them based on combined
@@ -211,7 +212,7 @@ class KeyBERTSentimentAware(KB):
         # Extract candidates with CountVectorizer (statistical n-grams)
         vectorizer = CountVectorizer(
             ngram_range=ngram_range,
-            stop_words='english',
+            stop_words=stop_words,
             max_features=self.candidate_pool_size
         )
         candidates = vectorizer.fit([doc]).get_feature_names_out()
@@ -246,6 +247,8 @@ class KeyBERTSentimentAware(KB):
         candidate_threshold: float = 0.4,
         keyphrase_ngram_range: Tuple[int, int] = (1, 3),
         print_doc_polarity: bool = False,
+        stop_words: str = 'english',
+        **kwargs
     ):
         """
         Extract top keywords from a document by combining semantic similarity and sentiment alignment.
@@ -281,7 +284,8 @@ class KeyBERTSentimentAware(KB):
         candidates = self._select_candidates(
             doc,
             ngram_range=keyphrase_ngram_range,
-            threshold=candidate_threshold
+            threshold=candidate_threshold,
+            stop_words=stop_words
         )
         if not candidates:
             print("No candidates passed the sentiment-semantic filter.")
