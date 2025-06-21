@@ -512,11 +512,15 @@ class ContextualKeyBERT(KeyBERT):
 
 
     @staticmethod
-    def extract_metadata(df: pd.DataFrame) -> list:
+    def extract_metadata(df: pd.DataFrame, alpha: float = 0.3) -> list:
         """
         Extracts and normalizes metadata scores per review, treating each movie separately.
-        Normalization maps scores into the range [-0.5, 0.5].
-        Constant features are mapped to 0.0 to avoid division issues.
+        Normalization maps each score into the range [-alpha, alpha].
+        Constant features are assigned 0.0.
+
+        Parameters:
+            df (pd.DataFrame): Input DataFrame
+            alpha (float): Half the desired output range (e.g., 0.5 for [-0.5, 0.5])
 
         Returns:
             List of lists: [utility_score, length_score, polarity_score, recency_score]
@@ -525,14 +529,13 @@ class ContextualKeyBERT(KeyBERT):
         df['Review_Date'] = pd.to_datetime(df['Review_Date'])
         df['Release_Date'] = df.groupby('Movie_Title')['Review_Date'].transform('min')
 
-        # Compute raw scores
         def compute_scores(row):
             likes = row['Helpful_Votes']
             total_votes = row['Total_Votes']
             dislikes = total_votes - likes
 
             utility_score = likes / total_votes if total_votes > 0 else 0.0
-            length_score = log(len(str(row['Review_Text'])))
+            length_score = len(str(row['Review_Text']))
             polarity_score = (likes - dislikes) / (total_votes + 1)
             days_since_release = (row['Review_Date'] - row['Release_Date']).days
             recency_score = 1 / log(days_since_release + 2)
@@ -542,16 +545,15 @@ class ContextualKeyBERT(KeyBERT):
         score_cols = ['utility', 'length', 'polarity', 'recency']
         df[score_cols] = df.apply(compute_scores, axis=1)
 
-        # Normalize per film
         def normalize(series):
             min_val = series.min()
             max_val = series.max()
             if max_val == min_val:
                 return pd.Series([0.0] * len(series), index=series.index)
-            return ((series - min_val) / (max_val - min_val)) - 0.5
+            normalized = (series - min_val) / (max_val - min_val)  # now in [0, 1]
+            return (normalized - 0.5) * (2 * alpha)  # scale to [-alpha, +alpha]
 
         for col in score_cols:
             df[col] = df.groupby('Movie_Title')[col].transform(normalize)
 
         return df[score_cols].values.tolist()
-
