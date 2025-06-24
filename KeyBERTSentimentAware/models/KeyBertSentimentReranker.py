@@ -3,12 +3,12 @@
 # pip install sentence-transformers
 
 import sys
-sys.path.append("../../SentimentAwareKeyBERT/models")
+sys.path.append("../KeyBERTSentimentAware")
 
 from typing import List, Sequence, Tuple, Union
 from keybert import KeyBERT  # type: ignore
 from sentence_transformers import SentenceTransformer  # type: ignore
-from sentiment_model import SentimentModel  
+from models.SentimentModel import SentimentModel  
 
 # KeyBERT Post-hoc Sentiment-Aware Re-ranking
 

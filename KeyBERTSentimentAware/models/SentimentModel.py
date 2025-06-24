@@ -4,7 +4,7 @@
 # pip install transformers
 
 # Required imports
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
+from transformers import AutoTokenizer, AutoModelForSequenceClassification # type: ignore
 import torch
 import torch.nn.functional as F
 import numpy as np
