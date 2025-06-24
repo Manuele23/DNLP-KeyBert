@@ -1,18 +1,26 @@
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException, NoSuchElementException
+from webdriver_manager.chrome import ChromeDriverManager
+import re
+import tqdm
+import requests
+from bs4 import BeautifulSoup
+import pandas as pd
+from selenium.webdriver.chrome.options import Options
+import time
+
+
+
 class Retriever:
   def __init__(self):
     pass
 
 
   def get_reviews_ids_from_movie_id(self, movie_id):
-
-    from selenium import webdriver
-    from selenium.webdriver.chrome.service import Service
-    from selenium.webdriver.common.by import By
-    from selenium.webdriver.support.ui import WebDriverWait
-    from selenium.webdriver.support import expected_conditions as EC
-    from selenium.common.exceptions import TimeoutException, NoSuchElementException
-    from webdriver_manager.chrome import ChromeDriverManager
-    import re
 
     options = webdriver.ChromeOptions()
     options.headless = True
@@ -24,15 +32,15 @@ class Retriever:
     try:
         driver.get(url)
 
-        # Cerca e clicca il bottone "Tutto" o "Altri"
+        # Look for and click the button "Tutto" or "Altri"
         try:
-            # Aspetta e clicca il bottone "Tutto"
+            # Wait and click the button "Tutto"
             load_all_button = WebDriverWait(driver, 3).until(
                 EC.element_to_be_clickable((By.XPATH, '//button//span[contains(text(), "Tutto")]'))
             )
             driver.execute_script("arguments[0].click();", load_all_button)
         except TimeoutException:
-            # Se "Tutto" non è presente, prova con "Altri"
+            # If "Tutto" is not there, try with "Altri"
             try:
                 load_all_button_altro = WebDriverWait(driver, 3).until(
                     EC.element_to_be_clickable((By.XPATH, '//button//span[contains(text(), "Altri")]'))
@@ -43,7 +51,7 @@ class Retriever:
                 driver.quit()
                 return None
 
-        # Aspetta che il caricamento delle recensioni sia completato
+        # Wait for the reviews to be fully up
         WebDriverWait(driver, 3600).until(
             EC.invisibility_of_element_located((By.CLASS_NAME, "ipc-see-more"))
         )
@@ -52,7 +60,7 @@ class Retriever:
         print('execution interrupted - was taking too long')
         
 
-    # Estrai i numeri dalle recensioni
+    # Extract te numbers from the reviews
     html = driver.page_source
     pattern = re.compile(rf'{re.escape(text_to_find)}(\d+)')
     matches = pattern.findall(html)
@@ -63,11 +71,6 @@ class Retriever:
 
 
   def get_reviews_dataframe_from_set_of_review_ids(self, review_ids):
-    import re
-    import tqdm
-    import requests
-    from bs4 import BeautifulSoup
-    import pandas as pd
     
     # Initialize a list to store the review data
     reviews_data = []
@@ -161,16 +164,6 @@ class Retriever:
 
 
   def get_movie_keywords_from_movie_id(self, movie_id):
-    from selenium import webdriver
-    from selenium.webdriver.chrome.service import Service
-    from selenium.webdriver.chrome.options import Options
-    from selenium.webdriver.common.by import By
-    from selenium.webdriver.support.ui import WebDriverWait
-    from selenium.webdriver.support import expected_conditions as EC
-    from webdriver_manager.chrome import ChromeDriverManager
-    from bs4 import BeautifulSoup
-    import pandas as pd
-    import time
 
     url = f"https://www.imdb.com/title/tt{movie_id}/keywords/"
 
