@@ -9,17 +9,10 @@ from math import log
 
 from packaging import version
 from sklearn import __version__ as sklearn_version
-#from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import CountVectorizer
 
 from keybert import KeyBERT
-#from keybert._mmr import mmr
-#from keybert._maxsum import max_sum_distance
-#from keybert._highlight import highlight_document
 from keybert.backend._base import BaseEmbedder
-#from keybert.backend._utils import select_backend
-#from keybert.llm._base import BaseLLM
-#from keybert import KeyLLM
 
 
 class KeyBERTMetadata(KeyBERT):
@@ -180,7 +173,7 @@ class KeyBERTMetadata(KeyBERT):
 
         Parameters:
             df (pd.DataFrame): Input DataFrame
-            alpha (float): Half the desired output range (e.g., 0.5 for [-0.5, 0.5])
+            alpha (float): Half the desired output range (e.g., 0.3 for [-0.3, 0.3])
 
         Returns:
             List of lists: [utility_score, length_score, polarity_score, recency_score]
@@ -195,7 +188,7 @@ class KeyBERTMetadata(KeyBERT):
             dislikes = total_votes - likes
 
             utility_score = likes / total_votes if total_votes > 0 else 0.0
-            length_score = len(str(row['Review_Text']))
+            length_score = len(str(row['Preprocessed_Review']))
             polarity_score = (likes - dislikes) / (total_votes + 1)
             days_since_release = (row['Review_Date'] - row['Release_Date']).days
             recency_score = 1 / log(days_since_release + 2)
