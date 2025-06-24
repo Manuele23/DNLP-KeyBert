@@ -6,7 +6,9 @@
 # pip install sentence-transformers
 
 import sys
-sys.path.append("../../SentimentAwareKeyBERT/models")
+
+import sys
+sys.path.append("../KeyBERTSentimentAware")  # Add parent directory to import custom modules
 
 import numpy as np  # Fundamental package for numerical computing in Python
 from typing import Tuple  # Used for type hinting tuples in function signatures
@@ -24,7 +26,7 @@ from keybert import KeyBERT as KB  # type: ignore
 from sentence_transformers import SentenceTransformer   # type: ignore
 
 # Custom sentiment model wrapper (generalized)
-from sentiment_model import SentimentModel
+from models.SentimentModel import SentimentModel
 
 # KeyBERT extension for sentiment-aware keyword extraction
 # This class extends KeyBERT to include sentiment-aware keyword extraction
@@ -182,7 +184,7 @@ class KeyBERTSentimentAware(KB):
     def _select_candidates(
         self, 
         doc: str, 
-        ngram_range: Tuple[int, int] = (1, 3), 
+        ngram_range: Tuple[int, int] = (1, 2), 
         threshold: float = 0.4,
         stop_words: str = 'english'
     ):
@@ -245,7 +247,7 @@ class KeyBERTSentimentAware(KB):
         doc: str,
         top_n: int = 5,
         candidate_threshold: float = 0.4,
-        keyphrase_ngram_range: Tuple[int, int] = (1, 3),
+        keyphrase_ngram_range: Tuple[int, int] = (1, 2),
         print_doc_polarity: bool = False,
         stop_words: str = 'english',
         **kwargs
