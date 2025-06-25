@@ -68,7 +68,17 @@ class SentimentModel:
         # Sort labels by their IDs to maintain order
         self.labels_ordered = [id2label[i] for i in range(len(id2label))]
 
+
+
         # Define label to score mapping based on known models
+
+        # Using a weighted average of class probabilities mapped to sentiment scores (e.g., 0.0, 0.25, ..., 1.0)
+        # is generally better than relying on a single compound score (if available). This approach:
+        # - Provides full control over the sentiment scale and allows consistent interpretation.
+        # - Aligns directly with the model's output (probabilities per class), rather than applying post-hoc rules.
+        # - Works with any number of sentiment classes and generalizes well across models.
+        # - Produces a continuous, interpretable score that is ideal for averaging, thresholding, and ranking.
+
         if self.model_name == "cardiffnlp/twitter-roberta-base-sentiment":
             # Labels: ['negative', 'neutral', 'positive']
             self.label_to_score = {
@@ -167,7 +177,8 @@ class SentimentModel:
             all_probs.append(avg_probs)
 
         return np.array(all_probs)
-
+    
+    
     def predict_score(self, text):
         """
         Compute the continuous sentiment score for a single input text.
