@@ -68,8 +68,13 @@ class Preprocessor:
                 if self.is_valid(candidate.lower()):
                     corrected.append(candidate + space)
                     break
+
+            # Fallback to autocorrect if no valid candidate found
             else:
-                # Fallback to autocorrect if no valid candidate found
+                # This else belongs to the `for candidate...` loop!
+                # It runs only if the above loop never executed `break`.
+                # Meaning: no valid candidate was found.
+                # In that case, we use fallback: apply autocorrect.
                 corrected.append(self.spell(token_text) + space)
 
         # Normalize multiple spaces to a single space
