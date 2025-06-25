@@ -58,7 +58,7 @@ class KeyBERTSentimentAware(KB):
         alpha=1.0 means only sentiment alignment is considered.
         alpha=0.0 means only semantic similarity is considered.
 
-    candidate_pool_size : int, optional (default: 100)
+    candidate_pool_size : int, optional (default: 20)
         Maximum number of initial candidate keywords to extract.
 
     device : str, optional (default: "cpu")
@@ -70,7 +70,7 @@ class KeyBERTSentimentAware(KB):
         model,
         sentiment_model_name: str ="cardiffnlp/twitter-roberta-base-sentiment", # or "nlptown/bert-base-multilingual-uncased-sentiment"
         alpha: float = 0.5,
-        candidate_pool_size: int = 100,
+        candidate_pool_size: int = 20,
         device: str = "cpu",
     ):
         # Validate that the specified device is either 'cpu' or 'cuda'
@@ -152,10 +152,9 @@ class KeyBERTSentimentAware(KB):
 
     def _get_candidate_polarities(self, candidates) -> np.ndarray:
         """
-        Compute continuous sentiment polarity scores for each candidate keyword.
-
-        This method extends candidate scoring with sentiment, overriding base candidate processing.
-
+        Compute continuous sentiment polarity scores for each candidate keyword using
+        a fully vectorized approach (faster than per-loop).
+        
         Parameters:
         -----------
         candidates : iterable of str
@@ -166,26 +165,29 @@ class KeyBERTSentimentAware(KB):
         np.ndarray
             Array of polarity scores for each candidate keyword.
         """
-        candidates = list(candidates)  # ensure correct input format for tokenizer
-        
-        # Batch predict probabilities for all candidates
-        probs_list = self.sentiment_model.predict_proba(candidates)
-        
-        polarities = []
-        for probs in probs_list:
-            # Weighted average as continuous polarity score
-            polarity = sum(
-                p * self.sentiment_model.label_to_score[label]
-                for p, label in zip(probs, self.sentiment_model.labels_ordered)
-            )
-            polarities.append(polarity)
-        return np.array(polarities)
+        candidates = list(candidates)  # ensure correct input format
+
+        # Get probability distributions over sentiment classes for all candidates
+        # Use torch.no_grad() to disable gradient tracking for inference
+        # This is more efficient and avoids unnecessary memory usage.
+        with torch.no_grad():
+            probs_list = self.sentiment_model.predict_proba(candidates)
+
+
+        # Create array of label scores in the correct order
+        label_scores = np.array([self.sentiment_model.label_to_score[label] for label in self.sentiment_model.labels_ordered])
+
+        # Matrix multiply: (n_samples x n_classes) dot (n_classes,) => (n_samples,)
+        polarities = np.dot(probs_list, label_scores)
+
+        return polarities
+
 
     def _select_candidates(
         self, 
         doc: str, 
         ngram_range: Tuple[int, int] = (1, 2), 
-        threshold: float = 0.4,
+        threshold: float = 0.2,
         stop_words: str = 'english'
     ):
         """
@@ -246,7 +248,7 @@ class KeyBERTSentimentAware(KB):
         self,
         doc: str,
         top_n: int = 5,
-        candidate_threshold: float = 0.4,
+        candidate_threshold: float = 0.2,
         keyphrase_ngram_range: Tuple[int, int] = (1, 2),
         print_doc_polarity: bool = False,
         stop_words: str = 'english',
@@ -279,7 +281,6 @@ class KeyBERTSentimentAware(KB):
         -------
         list of tuples
             List of (keyword, score, keyword_sentiment) tuples sorted by descending combined score.
-
         """
 
         # Select candidates filtered by combined semantic+sentiment scoring
@@ -331,4 +332,4 @@ class KeyBERTSentimentAware(KB):
         # Select top_n keywords sorted by combined score descending
         top_indices = np.argsort(final_scores)[-top_n:][::-1]
 
-        return [(candidates[i], final_scores[i], cand_pols[i]) for i in top_indices]
+        return [(candidates[i], round(final_scores[i],4) , cand_pols[i]) for i in top_indices]

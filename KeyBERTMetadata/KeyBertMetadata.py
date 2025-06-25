@@ -11,8 +11,8 @@ from packaging import version
 from sklearn import __version__ as sklearn_version
 from sklearn.feature_extraction.text import CountVectorizer
 
-from keybert import KeyBERT
-from keybert.backend._base import BaseEmbedder
+from keybert import KeyBERT # type: ignore
+from keybert.backend._base import BaseEmbedder # type: ignore
 
 
 class KeyBERTMetadata(KeyBERT):
