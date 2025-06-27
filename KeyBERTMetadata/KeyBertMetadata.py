@@ -7,6 +7,7 @@ import pandas as pd
 from typing import List, Union, Tuple, Optional
 from math import log
 
+
 from packaging import version
 from sklearn import __version__ as sklearn_version
 from sklearn.feature_extraction.text import CountVectorizer
@@ -46,6 +47,7 @@ class KeyBERTMetadata(KeyBERT):
         min_df: int = 1,
         vectorizer: CountVectorizer = None,
         metadata: Optional[List[List[float]]] = None,
+        optional_pruning: bool = True,
     ) -> Union[List[Tuple[str, float]], List[List[Tuple[str, float]]]]:
         """Extract document and word embeddings for the input documents and the
         generated candidate keywords/keyphrases respectively.
@@ -69,6 +71,7 @@ class KeyBERTMetadata(KeyBERT):
             vectorizer: Pass in your own `CountVectorizer` from
                         `sklearn.feature_extraction.text.CountVectorizer`
             metadata: Metadata values for each document
+            optional_pruning: If True, removes selected columns from the embeddings.
 
         Returns:
             doc_embeddings: The embeddings of each document.
@@ -127,6 +130,16 @@ class KeyBERTMetadata(KeyBERT):
         doc_embeddings = self.model.embed(docs)
         word_embeddings = self.model.embed(words)
 
+        # Optional pruning of useless embeddings
+        if optional_pruning:
+            cols_to_remove = [127, 223, 319]
+
+            # Remove specified columns from document embeddings
+            doc_embeddings = np.delete(doc_embeddings, cols_to_remove, axis=1)
+
+            # Remove specified columns from word embeddings
+            word_embeddings = np.delete(word_embeddings, cols_to_remove, axis=1)
+
 
         # Enrich doc embeddings with metadata if provided
         if metadata is not None:
@@ -162,7 +175,7 @@ class KeyBERTMetadata(KeyBERT):
 
         return np.vstack(doc_embeddings), np.vstack(word_embeddings)
 
-
+    
 
     @staticmethod
     def extract_metadata(df: pd.DataFrame, alpha: float = 0.3) -> list:
@@ -176,15 +189,24 @@ class KeyBERTMetadata(KeyBERT):
             alpha (float): Half the desired output range (e.g., 0.3 for [-0.3, 0.3])
 
         Returns:
-            List of lists: [utility_score, length_score, polarity_score, recency_score]
+            List of lists: [utility, length, polarity, recency, controversy, rating_deviation]
         """
         df = df.copy()
         df['Review_Date'] = pd.to_datetime(df['Review_Date'])
         df['Release_Date'] = df.groupby('Movie_Title')['Review_Date'].transform('min')
 
+        # Precompute per-movie rating means for deviation score
+        df['mean_rating'] = df.groupby('Movie_Title')['Rating'].transform('mean')
+
         def compute_scores(row):
-            likes = row['Helpful_Votes']
-            total_votes = row['Total_Votes']
+            #se helpful votes o total votes è nan likes e total votes sono 0
+            if pd.isna(row['Helpful_Votes']) or pd.isna(row['Total_Votes']):
+                likes = 0
+                total_votes = 0
+            else:
+                likes = row['Helpful_Votes']
+                total_votes = row['Total_Votes']
+            
             dislikes = total_votes - likes
 
             utility_score = likes / total_votes if total_votes > 0 else 0.0
@@ -193,9 +215,21 @@ class KeyBERTMetadata(KeyBERT):
             days_since_release = (row['Review_Date'] - row['Release_Date']).days
             recency_score = 1 / log(days_since_release + 2)
 
-            return pd.Series([utility_score, length_score, polarity_score, recency_score])
+            controversy_score = 1 - abs(polarity_score)
+            
+            # Handle NaN ratings
+            if pd.isna(row['Rating']):
+                rating_deviation = 0.0
+            else:
+                # Calculate the absolute deviation from the mean rating for the movie
+                rating_deviation = abs(row['Rating'] - row['mean_rating'])
 
-        score_cols = ['utility', 'length', 'polarity', 'recency']
+            return pd.Series([
+                utility_score, length_score, polarity_score,
+                recency_score, controversy_score, rating_deviation
+            ])
+
+        score_cols = ['utility', 'length', 'polarity', 'recency', 'controversy', 'rating_deviation']
         df[score_cols] = df.apply(compute_scores, axis=1)
 
         def normalize(series):
@@ -203,8 +237,8 @@ class KeyBERTMetadata(KeyBERT):
             max_val = series.max()
             if max_val == min_val:
                 return pd.Series([0.0] * len(series), index=series.index)
-            normalized = (series - min_val) / (max_val - min_val)  # now in [0, 1]
-            return (normalized - 0.5) * (2 * alpha)  # scale to [-alpha, +alpha]
+            normalized = (series - min_val) / (max_val - min_val)
+            return (normalized - 0.5) * (2 * alpha)
 
         for col in score_cols:
             df[col] = df.groupby('Movie_Title')[col].transform(normalize)
