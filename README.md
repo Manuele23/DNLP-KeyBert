@@ -135,49 +135,47 @@ All modules share a common keyword generation pipeline (n-gram candidate extract
 
 ```
 Dataset/
-│   ├── keywords_ground_truth.pkl         
-│   ├── summary_IA.pkl                    
-│   ├── sw_reviews.pkl                    
-│   ├── others_reviews.pkl                
-│   ├── Reviews_By_Movie/
-│   │   ├── LaLaLand.pkl, SW_Episode1.pkl, ...
-│   └── Extracted_Keywords/
-│       ├── kw_LaLaLand.pkl, kw_SW_Episode1.pkl, ...
+   ├── keywords_ground_truth.pkl         
+   ├── summary_IA.pkl                    
+   ├── sw_reviews.pkl                    
+   ├── others_reviews.pkl                
+   ├── Reviews_By_Movie/
+   │   ├── LaLaLand.pkl, SW_Episode1.pkl, ...
+   └── Extracted_Keywords/
+       ├── kw_LaLaLand.pkl, kw_SW_Episode1.pkl, ...
 
 Dataset Creation/
-│   ├── dataset_creation.ipynb            
-│   ├── IMDB_database_analysis.ipynb      
-│   ├── keywords_summaryIA.ipynb          
-│   └── Retriever.py
+   ├── dataset_creation.ipynb            
+   ├── IMDB_database_analysis.ipynb      
+   ├── keywords_summaryIA.ipynb          
+   └── Retriever.py
 
 Evaluation/
-│   ├── keyword_extraction.ipynb          
-│   ├── evaluation_metadata.ipynb         
-│   ├── evaluation_reranker.ipynb         
-│   └── evaluation_sentiment.ipynb                       
+   ├── keyword_extraction.ipynb          
+   ├── evaluation_metadata.ipynb         
+   ├── evaluation_reranker.ipynb         
+   └── evaluation_sentiment.ipynb                       
 
 KeyBERTMetadata/
-│   ├── KeyBertMetadata.py                
-│   └── PCA_analysis.ipynb                
+   ├── KeyBertMetadata.py                
+   └── PCA_analysis.ipynb                
 
 KeyBERTSentimentAware/
-│   ├── models/
-│   │   ├── KeyBertSentimentAware.py      
-│   │   ├── KeyBertSentimentReranker.py   
-│   │   └── SentimentModel.py             
-│   └── tests/
-│       ├── test_sentiment.ipynb          
-│       └── test_reranker.ipynb
+   ├── models/
+   │   ├── KeyBertSentimentAware.py      
+   │   ├── KeyBertSentimentReranker.py   
+   │   └── SentimentModel.py             
+   └── tests/
+       ├── test_sentiment.ipynb          
+       └── test_reranker.ipynb
 
 Preprocessing/
-│   ├── preprocessing.py                  
-│   ├── preprocessing_tests.ipynb
-│   ├── dataset_preprocessing.ipynb         
-│   └── Further_Analysis/
-│       ├── remove_movie_words.ipynb      
-│       ├── TF-IDF_Analysis.ipynb             
-
-       
+   ├── preprocessing.py
+   ├── preprocessing_tests.ipynb
+   ├── dataset_preprocessing.ipynb         
+   └── Further_Analysis/
+       ├── remove_movie_words.ipynb      
+       ├── TF-IDF_Analysis.ipynb             
 
 Keyword Extraction with BERT – Towards Human-Aligned Relevance.pdf  # Report
 README.md
