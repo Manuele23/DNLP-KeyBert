@@ -28,7 +28,6 @@ By incorporating additional dimensions of meaning and context, the proposed appr
 | Web Scraping              | ![Selenium](https://img.shields.io/badge/selenium-4.1.0-green) ![WebDriver Manager](https://img.shields.io/badge/webdriver--manager-3.5.4-lightgrey) ![Requests](https://img.shields.io/badge/requests-2.26.0-darkgreen) ![BeautifulSoup](https://img.shields.io/badge/beautifulsoup-4.9.3-yellow) ![IMDbPY](https://img.shields.io/badge/imdbpy-2021.4.18-orange) |
 | Built-in Modules          | ![Pickle](https://img.shields.io/badge/pickle-built--in-lightgrey) ![re](https://img.shields.io/badge/re-built--in-lightgrey) ![time](https://img.shields.io/badge/time-built--in-lightgrey) |
 
----
 ## Dataset
 
 ### Source
@@ -111,7 +110,6 @@ This **hybrid ground truth** enables both:
 - **Semantic evaluation**: measuring the overlap and relevance between extracted keywords and known useful terms
 - **Sentiment-aware validation**: analyzing the alignment between the sentiment of extracted keywords and the polarity of the original review
 
----
 ## Methodology
 
 ### System Components
@@ -135,9 +133,6 @@ This **hybrid ground truth** enables both:
 
 All modules share a common keyword generation pipeline (n-gram candidate extraction and stopword-aware filtering) and are evaluated against a hybrid ground truth combining curated plot keywords and AI-derived thematic keywords.
 
----
-
-## Repository Structure
 ## Repository Structure
 
 ```
@@ -190,7 +185,6 @@ Keyword Extraction with BERT – Towards Human-Aligned Relevance.pdf  # Report
 README.md
 ```
 
-
 #### Description of the Repository Content
 
 - **`Dataset/`**  
@@ -227,11 +221,7 @@ README.md
 - **`Keyword Extraction with BERT – Towards Human-Aligned Relevance.pdf`**  
   The original report describing how KeyBERT works.
 
----
-
 ## Usage
-
-### Installation
 
 To get started with the project, follow these steps:
 
@@ -249,7 +239,6 @@ To get started with the project, follow these steps:
 
 > No global environment setup is required.  
 > We recommend using a Python 3.9+ environment and executing notebooks sequentially for best results.
----
 
 ## Conclusion
 
@@ -259,15 +248,11 @@ The modular design of the framework enables specialization across different anal
 
 This flexibility positions the system not only as a keyword extractor, but also as a tool for producing interpretable, content-driven insights that adapt to different genres, audiences, or information needs.
 
----
-
 ## Contributors
 - **[Bianca Bartoli](https://github.com/BiancaBartoli)**
 - **[Alessandro Coco](https://github.com/0c0c)**
 - **[Francesca Geusa](https://github.com/FrancescaGeusa)** 
 - **[Manuele Mustari](https://github.com/Manuele23)**  
-
----
 
 ## License
 This project is licensed under the Apache 2.0 License. See the `LICENSE` file for details.
