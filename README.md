@@ -110,9 +110,7 @@ This **hybrid ground truth** enables both:
 - **Semantic evaluation**: measuring the overlap and relevance between extracted keywords and known useful terms
 - **Sentiment-aware validation**: analyzing the alignment between the sentiment of extracted keywords and the polarity of the original review
 
-## Methodology
-
-### System Components
+## System Components
 
 1. **KeyBERTSentimentReranker**
    - *Base*: KeyBERT with `all-MiniLM-L6-v2` sentence-transformer
