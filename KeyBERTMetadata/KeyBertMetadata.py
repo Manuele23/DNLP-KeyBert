@@ -199,7 +199,7 @@ class KeyBERTMetadata(KeyBERT):
         df['mean_rating'] = df.groupby('Movie_Title')['Rating'].transform('mean')
 
         def compute_scores(row):
-            #se helpful votes o total votes è nan likes e total votes sono 0
+            # If helpful votes or total votes are NaN, set likes and total votes to 0
             if pd.isna(row['Helpful_Votes']) or pd.isna(row['Total_Votes']):
                 likes = 0
                 total_votes = 0
