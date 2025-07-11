@@ -1,10 +1,4 @@
-# You need to install the following packages:
-# pip install numpy
-# pip install torch
-# pip install transformers
-
-# Required imports
-from transformers import AutoTokenizer, AutoModelForSequenceClassification # type: ignore
+from transformers import AutoTokenizer, AutoModelForSequenceClassification 
 import torch
 import torch.nn.functional as F
 import numpy as np
@@ -34,7 +28,6 @@ class SentimentModel:
         model_name : str
             HuggingFace model identifier.
             Default is "cardiffnlp/twitter-roberta-base-sentiment".
-            Alternatively, you can use "nlptown/bert-base-multilingual-uncased-sentiment"
 
         device : str
             Computation device. Should be either 'cpu' or 'cuda'.
