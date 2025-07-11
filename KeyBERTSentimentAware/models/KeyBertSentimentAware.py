@@ -11,9 +11,9 @@ from sklearn.feature_extraction.text import CountVectorizer  # Extract text n-gr
 from sklearn.metrics.pairwise import cosine_similarity  # Compute cosine similarity between embeddings
 
 # KeyBERT keyword extraction base class
-from keybert import KeyBERT as KB 
+from keybert import KeyBERT as KB # type: ignore
 # Sentence transformer for generating sentence embeddings
-from sentence_transformers import SentenceTransformer 
+from sentence_transformers import SentenceTransformer # type: ignore
 # Custom sentiment model wrapper
 from models.SentimentModel import SentimentModel
 
