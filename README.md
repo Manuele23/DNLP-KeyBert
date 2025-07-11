@@ -151,10 +151,14 @@ Dataset Creation/
    └── Retriever.py
 
 Evaluation/
+   ├── base_vs_metadata_evaluation.csv
+   ├── base_vs_reranker_evaluation.csv
+   ├── base_vs_sentiment_evaluation.csv
    ├── keyword_extraction.ipynb          
    ├── evaluation_metadata.ipynb         
    ├── evaluation_reranker.ipynb         
-   └── evaluation_sentiment.ipynb                       
+   ├── evaluation_sentiment.ipynb
+   └── result_analysis.ipynb                    
 
 KeyBERTMetadata/
    ├── KeyBertMetadata.py                
@@ -175,7 +179,7 @@ Preprocessing/
    ├── dataset_preprocessing.ipynb         
    └── Further_Analysis/
        ├── remove_movie_words.ipynb      
-       ├── TF-IDF_Analysis.ipynb             
+       └── TF-IDF_Analysis.ipynb             
 
 Keyword Extraction with BERT – Towards Human-Aligned Relevance.pdf  # Report
 README.md
@@ -194,7 +198,7 @@ README.md
   Includes scraping, parsing IMDb keywords and AI-generated summary processing.
 
 - **`Evaluation/`**  
-  Comparative evaluation of all models (baseline KeyBERT, metadata-based, sentiment-aware, reranker).  
+  Comparative evaluation of all models (baseline KeyBERT, metadata-based, sentiment-aware, reranker) with also a file for the results analysis.
 
 - **`Preprocessing/`**  
   Code for text normalization and cleaning.  
