@@ -120,8 +120,7 @@ class KeyBERTMetadata(KeyBERT):
             except ValueError:
                 return []
 
-        # Scikit-Learn Deprecation: get_feature_names is deprecated in 1.0
-        # and will be removed in 1.2. Please use get_feature_names_out instead.
+       
         if version.parse(sklearn_version) >= version.parse("1.0.0"):
             words = count.get_feature_names_out()
         else:
