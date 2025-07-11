@@ -1,6 +1,6 @@
 # DNLP-KeyBert
 
-The comprehensive project report, which provides an in-depth explanation of our methodology, experimental setup, and detailed results, is available for review **[here](METTERE LINK AL PAPER CHE STA DENTRO AL GITHUB)**.
+The comprehensive project report, which provides an in-depth explanation of our methodology, experimental setup, and detailed results, is available for review **[here](https://github.com/Manuele23/DNLP-KeyBert/blob/main/NLP_Report_KeyBERT_Geeks.pdf)**.
 
 ## Overview
 
