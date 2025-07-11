@@ -1,3 +1,7 @@
+# install the following packages:
+# pip install keybert
+# pip install sentence-transformers
+
 import sys
 sys.path.append("../KeyBERTSentimentAware")
 
