@@ -1,13 +1,9 @@
-# You need to install the following packages:
-# pip install keybert
-# pip install sentence-transformers
-
 import sys
 sys.path.append("../KeyBERTSentimentAware")
 
 from typing import List, Sequence, Tuple, Union
-from keybert import KeyBERT  # type: ignore
-from sentence_transformers import SentenceTransformer  # type: ignore
+from keybert import KeyBERT  
+from sentence_transformers import SentenceTransformer  
 from models.SentimentModel import SentimentModel  
 
 # KeyBERT Post-hoc Sentiment-Aware Re-ranking
@@ -44,7 +40,7 @@ class KeyBERTSentimentReranker(KeyBERT):
 
     def __init__(
         self,
-        model: Union[str, "SentenceTransformer"] = "sentence-transformers/all-MiniLM-L6-v2",  # type: ignore
+        model: Union[str, "SentenceTransformer"] = "sentence-transformers/all-MiniLM-L6-v2",  
         *,
         alpha: float = 0.5,
         sentiment_model_name: str = "cardiffnlp/twitter-roberta-base-sentiment", # or "nlptown/bert-base-multilingual-uncased-sentiment"
