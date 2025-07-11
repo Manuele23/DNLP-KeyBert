@@ -1,5 +1,12 @@
+# install the following packages:
+# pip install keybert
+# pip install scikit-learn
+# pip install numpy
+# pip install torch
+# pip install sentence-transformers
+
 import sys
-sys.path.append("../KeyBERTSentimentAware")  # Add parent directory to import custom modules
+sys.path.append("../KeyBERTSentimentAware")
 
 import numpy as np
 from typing import Tuple  # Used for type hinting tuples in function signatures
