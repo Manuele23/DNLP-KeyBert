@@ -1,16 +1,7 @@
-# You need to install the following packages:
-# pip install keybert
-# pip install scikit-learn
-# pip install numpy
-# pip install torch
-# pip install sentence-transformers
-
-import sys
-
 import sys
 sys.path.append("../KeyBERTSentimentAware")  # Add parent directory to import custom modules
 
-import numpy as np  # Fundamental package for numerical computing in Python
+import numpy as np
 from typing import Tuple  # Used for type hinting tuples in function signatures
 
 import torch  # Core PyTorch library for tensor computations
@@ -20,12 +11,10 @@ from sklearn.feature_extraction.text import CountVectorizer  # Extract text n-gr
 from sklearn.metrics.pairwise import cosine_similarity  # Compute cosine similarity between embeddings
 
 # KeyBERT keyword extraction base class
-from keybert import KeyBERT as KB  # type: ignore 
-
+from keybert import KeyBERT as KB 
 # Sentence transformer for generating sentence embeddings
-from sentence_transformers import SentenceTransformer   # type: ignore
-
-# Custom sentiment model wrapper (generalized)
+from sentence_transformers import SentenceTransformer 
+# Custom sentiment model wrapper
 from models.SentimentModel import SentimentModel
 
 # KeyBERT extension for sentiment-aware keyword extraction
@@ -68,7 +57,7 @@ class KeyBERTSentimentAware(KB):
     def __init__(
         self,
         model,
-        sentiment_model_name: str ="cardiffnlp/twitter-roberta-base-sentiment", # or "nlptown/bert-base-multilingual-uncased-sentiment"
+        sentiment_model_name: str ="cardiffnlp/twitter-roberta-base-sentiment",
         alpha: float = 0.5,
         candidate_pool_size: int = 20,
         device: str = "cpu",
